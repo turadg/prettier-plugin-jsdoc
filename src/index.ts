@@ -89,13 +89,6 @@ const options = {
     default: false,
     description: "Add an space between tag groups",
   },
-  jsdocCapitalizeDescription: {
-    name: "jsdocCapitalizeDescription",
-    type: "boolean",
-    category: "jsdoc",
-    default: true,
-    description: "Should capitalize first letter of description",
-  },
   jsdocPreferCodeFences: {
     name: "jsdocPreferCodeFences",
     type: "boolean",
@@ -116,7 +109,6 @@ const defaultOptions: JsdocOptions = {
   jsdocCommentLineStrategy: options.jsdocCommentLineStrategy.default,
   jsdocSeparateReturnsFromParam: options.jsdocSeparateReturnsFromParam.default,
   jsdocSeparateTagGroups: options.jsdocSeparateTagGroups.default,
-  jsdocCapitalizeDescription: options.jsdocCapitalizeDescription.default,
   jsdocPreferCodeFences: options.jsdocPreferCodeFences.default,
 };
 

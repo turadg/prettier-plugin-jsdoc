@@ -1,10 +1,9 @@
-import { format, BuiltInParserName } from "prettier";
+import { Content, Image, Link, List, Root, Text } from "mdast";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { BuiltInParserName, format } from "prettier";
 import { DESCRIPTION, EXAMPLE, TODO } from "./tags.js";
 import { AllOptions } from "./types.js";
-import { capitalizer, formatCode } from "./utils.js";
-import { Root, Content, Link, Image, Text, List } from "mdast";
-import { TAGS_PEV_FORMATE_DESCRIPTION } from "./roles.js";
-import { fromMarkdown } from "mdast-util-from-markdown";
+import { formatCode } from "./utils.js";
 
 const TABLE = "2@^5!~#sdE!_TABLE";
 
@@ -109,13 +108,6 @@ async function formatDescription(
       return `\n\n${TABLE}\n\n${_3 ? _3.slice(1) : ""}`;
     },
   );
-
-  if (
-    options.jsdocCapitalizeDescription &&
-    !TAGS_PEV_FORMATE_DESCRIPTION.includes(tag)
-  ) {
-    text = capitalizer(text);
-  }
 
   text = `${tagStringLength ? `${"!".repeat(tagStringLength - 1)}?` : ""}${
     text.startsWith("```") ? "\n" : ""
@@ -283,11 +275,6 @@ async function formatDescription(
 
                   _paragraph = _paragraph.replace(/\s+/g, " "); // Make single line
 
-                  if (
-                    options.jsdocCapitalizeDescription &&
-                    !TAGS_PEV_FORMATE_DESCRIPTION.includes(tag)
-                  )
-                    _paragraph = capitalizer(_paragraph);
                   if (options.jsdocDescriptionWithDot)
                     _paragraph = _paragraph.replace(/([\w\p{L}])$/u, "$1."); // Insert dot if needed
 
@@ -405,4 +392,4 @@ function breakDescriptionToLines(
   return `${beginningSpace}${result}`;
 }
 
-export { descriptionEndLine, FormatOptions, formatDescription };
+export { FormatOptions, descriptionEndLine, formatDescription };

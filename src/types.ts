@@ -15,7 +15,6 @@ export interface JsdocOptions {
   jsdocCommentLineStrategy: "singleLine" | "multiline" | "keep";
   jsdocSeparateReturnsFromParam: boolean;
   jsdocSeparateTagGroups: boolean;
-  jsdocCapitalizeDescription: boolean;
   jsdocPreferCodeFences: boolean;
 }
 

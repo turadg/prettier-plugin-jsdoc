@@ -190,7 +190,6 @@ Description is formatting as Markdown, so you could use any features of Markdown
 | jsdocVerticalAlignment            | Boolean                           | false       |
 | jsdocKeepUnParseAbleExampleIndent | Boolean                           | false       |
 | jsdocCommentLineStrategy          | ("singleLine","multiline","keep") | "singleLine |
-| jsdocCapitalizeDescription        | Boolean                           | true        |
 | jsdocSeparateReturnsFromParam     | Boolean                           | false       | Add an space between last @param and @returns                |
 | jsdocSeparateTagGroups            | Boolean                           | false       | Add an space between tag groups                              |
 | jsdocPreferCodeFences             | Boolean                           | false       | Always fence code blocks (surround them by triple backticks) |
