@@ -96,13 +96,6 @@ const options = {
     default: true,
     description: "Should capitalize first letter of description",
   },
-  tsdoc: {
-    name: "tsdoc",
-    type: "boolean",
-    category: "jsdoc",
-    default: false,
-    description: "Should format as tsdoc",
-  },
   jsdocAddDefaultToDescription: {
     name: "jsdocAddDefaultToDescription",
     type: "boolean",
@@ -133,7 +126,6 @@ const defaultOptions: JsdocOptions = {
   jsdocCapitalizeDescription: options.jsdocCapitalizeDescription.default,
   jsdocAddDefaultToDescription: options.jsdocAddDefaultToDescription.default,
   jsdocPreferCodeFences: options.jsdocPreferCodeFences.default,
-  tsdoc: options.tsdoc.default,
 };
 
 const parsers = {

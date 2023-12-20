@@ -194,7 +194,6 @@ Description is formatting as Markdown, so you could use any features of Markdown
 | jsdocSeparateReturnsFromParam     | Boolean                           | false       | Add an space between last @param and @returns                |
 | jsdocSeparateTagGroups            | Boolean                           | false       | Add an space between tag groups                              |
 | jsdocPreferCodeFences             | Boolean                           | false       | Always fence code blocks (surround them by triple backticks) |
-| tsdoc                             | Boolean                           | false       |
 
 Full up to date list and description of options can be found in Prettier help. First install plugin then run Prettier with "--help" option.
 
@@ -219,16 +218,6 @@ Then, in your .eslintrc.json:
     "prettier/prettier": "error"
   }
 }
-```
-
-## Tsdoc
-
-We hope to support whole tsdoc, if we missed somethings please create an issue.
-
-```json
-{
-  "tsdoc": true
-};
 ```
 
 ## Contribute

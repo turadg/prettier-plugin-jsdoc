@@ -18,7 +18,6 @@ export interface JsdocOptions {
   jsdocAddDefaultToDescription: boolean;
   jsdocCapitalizeDescription: boolean;
   jsdocPreferCodeFences: boolean;
-  tsdoc: boolean;
 }
 
 export interface AllOptions extends ParserOptions, JsdocOptions {}

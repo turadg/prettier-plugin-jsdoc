@@ -16,7 +16,7 @@ import {
   TAGS_VERTICALLY_ALIGN_ABLE,
 } from "./roles.js";
 import { AllOptions } from "./types.js";
-import { formatCode, isDefaultTag } from "./utils.js";
+import { isDefaultTag } from "./utils.js";
 
 const stringify = async (
   { name, description, type, tag }: Spec,
@@ -38,9 +38,6 @@ const stringify = async (
     jsdocSpaces,
     jsdocVerticalAlignment,
     jsdocDescriptionTag,
-    tsdoc,
-    useTabs,
-    tabWidth,
     jsdocSeparateTagGroups,
   } = options;
   const gap = " ".repeat(jsdocSpaces);
@@ -93,34 +90,8 @@ const stringify = async (
   }
   if (name) tagString += `${gap}${name}${" ".repeat(tagNameGapAdj)}`;
 
-  // Try to use prettier on @example tag description
-  if (tag === EXAMPLE && !tsdoc) {
-    const exampleCaption = description.match(/<caption>([\s\S]*?)<\/caption>/i);
-
-    if (exampleCaption) {
-      description = description.replace(exampleCaption[0], "");
-      tagString = `${tagString} ${exampleCaption[0]}`;
-    }
-
-    const beginningSpace = useTabs ? "\t" : " ".repeat(tabWidth);
-    const formattedExample = await formatCode(
-      description,
-      beginningSpace,
-      options,
-    );
-
-    tagString += formattedExample
-      .replace(
-        new RegExp(
-          `^\\n${beginningSpace
-            .replace(/[\t]/g, "[\\t]")
-            .replace(/[^S\r\n]/g, "[^S\\r\\n]")}\\n`,
-        ),
-        "",
-      )
-      .trimEnd();
-  } // Add description (complicated because of text wrap)
-  else if (description) {
+  // Add description (complicated because of text wrap)
+  if (description) {
     let descriptionString = "";
     if (useTagTitle) tagString += gap + " ".repeat(descGapAdj);
     if (
@@ -134,8 +105,7 @@ const stringify = async (
 
       // Wrap tag description
       const beginningSpace =
-        tag === DESCRIPTION ||
-        ([EXAMPLE, REMARKS, PRIVATE_REMARKS].includes(tag) && tsdoc)
+        tag === DESCRIPTION || [EXAMPLE, REMARKS, PRIVATE_REMARKS].includes(tag)
           ? ""
           : "  "; // google style guide space
 

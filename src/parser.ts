@@ -41,7 +41,6 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
 
     options = {
       ...options,
-      printWidth: options.jsdocPrintWidth ?? options.printWidth,
     };
 
     const eol =
