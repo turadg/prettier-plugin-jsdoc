@@ -96,13 +96,6 @@ const options = {
     default: true,
     description: "Should capitalize first letter of description",
   },
-  jsdocAddDefaultToDescription: {
-    name: "jsdocAddDefaultToDescription",
-    type: "boolean",
-    category: "jsdoc",
-    default: true,
-    description: "Add Default value of a param to end description",
-  },
   jsdocPreferCodeFences: {
     name: "jsdocPreferCodeFences",
     type: "boolean",
@@ -124,7 +117,6 @@ const defaultOptions: JsdocOptions = {
   jsdocSeparateReturnsFromParam: options.jsdocSeparateReturnsFromParam.default,
   jsdocSeparateTagGroups: options.jsdocSeparateTagGroups.default,
   jsdocCapitalizeDescription: options.jsdocCapitalizeDescription.default,
-  jsdocAddDefaultToDescription: options.jsdocAddDefaultToDescription.default,
   jsdocPreferCodeFences: options.jsdocPreferCodeFences.default,
 };
 
