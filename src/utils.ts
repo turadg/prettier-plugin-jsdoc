@@ -20,19 +20,6 @@ function convertToModernType(oldType: string): string {
       .replace(/^\?\s*(\w+)$/, "$1 | null")
       .replace(/^(\w+)\s*\?$/, "$1 | null");
 
-    // convert `Array<Foo>` to `Foo[]`
-    let changed = true;
-    while (changed) {
-      changed = false;
-      type = type.replace(
-        /(^|[^$\w\xA0-\uFFFF])Array\s*<((?:[^<>=]|=>|=(?!>)|<(?:[^<>=]|=>|=(?!>))+>)+)>/g,
-        (_, prefix, inner) => {
-          changed = true;
-          return `${prefix}(${inner})[]`;
-        },
-      );
-    }
-
     return type;
   });
 }
