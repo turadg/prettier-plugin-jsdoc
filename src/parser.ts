@@ -4,25 +4,20 @@ import {
   convertToModernType,
   formatType,
   detectEndOfLine,
-  findTokenIndex,
   findPluginByParser,
   isDefaultTag,
 } from "./utils.js";
-import { DESCRIPTION, PARAM, RETURNS, EXAMPLE } from "./tags.js";
+import { DESCRIPTION } from "./tags.js";
 import {
   TAGS_DESCRIPTION_NEEDED,
-  TAGS_GROUP_HEAD,
-  TAGS_GROUP_CONDITION,
   TAGS_NAMELESS,
   TAGS_ORDER,
   TAGS_SYNONYMS,
   TAGS_TYPELESS,
-  TAGS_VERTICALLY_ALIGN_ABLE,
 } from "./roles.js";
-import { AST, AllOptions, PrettierComment, Token } from "./types.js";
+import { AST, AllOptions, PrettierComment } from "./types.js";
 import { stringify } from "./stringify.js";
 import { Parser } from "prettier";
-import { SPACE_TAG_DATA } from "./tags.js";
 
 const {
   name: nameTokenizer,
@@ -56,8 +51,6 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
     await Promise.all(
       ast.comments.map(async (comment) => {
         if (!isBlockComment(comment)) return;
-        const tokenIndex = findTokenIndex(ast.tokens, comment);
-        const paramsOrder = getParamsOrders(ast, tokenIndex);
         const originalValue = comment.value;
 
         /** Issue: https://github.com/hosseinmd/prettier-plugin-jsdoc/issues/18 */
@@ -105,10 +98,6 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
           options,
         );
 
-        let maxTagTitleLength = 0;
-        let maxTagTypeLength = 0;
-        let maxTagNameLength = 0;
-
         let tags = parsed.tags
           // Prepare tags data
           .map(({ type, optional, ...rest }) => {
@@ -132,22 +121,6 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
             } as Spec;
           });
 
-        // Group tags
-        tags = sortTags(tags, paramsOrder, options);
-
-        if (options.jsdocSeparateReturnsFromParam) {
-          tags = tags.flatMap((tag, index) => {
-            if (tag.tag === RETURNS && tags[index - 1]?.tag === PARAM) {
-              return [SPACE_TAG_DATA, tag];
-            }
-
-            return [tag];
-          });
-        }
-        if (options.jsdocAddDefaultToDescription) {
-          tags = tags.map(addDefaultValueToDescription);
-        }
-
         tags = await Promise.all(
           tags
             .map(assignOptionalAndDefaultToName)
@@ -164,44 +137,7 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
                 type,
               } as Spec;
             }),
-        ).then((formattedTags) =>
-          formattedTags.map(({ type, name, description, tag, ...rest }) => {
-            const isVerticallyAlignAbleTags =
-              TAGS_VERTICALLY_ALIGN_ABLE.includes(tag);
-
-            if (isVerticallyAlignAbleTags) {
-              maxTagTitleLength = Math.max(maxTagTitleLength, tag.length);
-              maxTagTypeLength = Math.max(maxTagTypeLength, type.length);
-              maxTagNameLength = Math.max(maxTagNameLength, name.length);
-            }
-
-            return {
-              type,
-              name,
-              description,
-              tag,
-              ...rest,
-            };
-          }),
         );
-
-        if (options.jsdocSeparateTagGroups) {
-          tags = tags.flatMap((tag, index) => {
-            const prevTag = tags[index - 1];
-            if (
-              prevTag &&
-              prevTag.tag !== DESCRIPTION &&
-              prevTag.tag !== EXAMPLE &&
-              prevTag.tag !== SPACE_TAG_DATA.tag &&
-              tag.tag !== SPACE_TAG_DATA.tag &&
-              prevTag.tag !== tag.tag
-            ) {
-              return [SPACE_TAG_DATA, tag];
-            }
-
-            return [tag];
-          });
-        }
 
         const filteredTags = tags.filter(({ description, tag }) => {
           if (!description && TAGS_DESCRIPTION_NEEDED.includes(tag)) {
@@ -217,9 +153,9 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
             tagIndex,
             filteredTags,
             { ...options, printWidth: commentContentPrintWidth },
-            maxTagTitleLength,
-            maxTagTypeLength,
-            maxTagNameLength,
+            0,
+            0,
+            0,
           );
           comment.value += formattedTag;
         }
@@ -248,82 +184,6 @@ export const getParser = (originalParse: Parser["parse"], parserName: string) =>
 
     return ast;
   };
-
-function sortTags(
-  tags: Spec[],
-  paramsOrder: string[] | undefined,
-  options: AllOptions,
-): Spec[] {
-  let canGroupNextTags = false;
-  let shouldSortAgain = false;
-
-  tags = tags
-    .reduce<Spec[][]>((tagGroups, cur) => {
-      if (
-        tagGroups.length === 0 ||
-        (TAGS_GROUP_HEAD.includes(cur.tag) && canGroupNextTags)
-      ) {
-        canGroupNextTags = false;
-        tagGroups.push([]);
-      }
-      if (TAGS_GROUP_CONDITION.includes(cur.tag)) {
-        canGroupNextTags = true;
-      }
-      tagGroups[tagGroups.length - 1].push(cur);
-
-      return tagGroups;
-    }, [])
-    .flatMap((tagGroup, index, array) => {
-      // sort tags within groups
-      tagGroup.sort((a, b) => {
-        if (
-          paramsOrder &&
-          paramsOrder.length > 1 &&
-          a.tag === PARAM &&
-          b.tag === PARAM
-        ) {
-          const aIndex = paramsOrder.indexOf(a.name);
-          const bIndex = paramsOrder.indexOf(b.name);
-          if (aIndex > -1 && bIndex > -1) {
-            //sort params
-            return aIndex - bIndex;
-          }
-          return 0;
-        }
-        return (
-          getTagOrderWeight(a.tag, options) - getTagOrderWeight(b.tag, options)
-        );
-      });
-
-      // add an empty line between groups
-      if (array.length - 1 !== index) {
-        tagGroup.push(SPACE_TAG_DATA);
-      }
-
-      if (
-        index > 0 &&
-        tagGroup[0]?.tag &&
-        !TAGS_GROUP_HEAD.includes(tagGroup[0].tag)
-      ) {
-        shouldSortAgain = true;
-      }
-
-      return tagGroup;
-    });
-
-  return shouldSortAgain ? sortTags(tags, paramsOrder, options) : tags;
-}
-
-/**
- * Control order of tags by weights. Smaller value brings tag higher.
- */
-function getTagOrderWeight(tag: string, options: AllOptions): number {
-  if (tag === DESCRIPTION && !options.jsdocDescriptionTag) {
-    return -1;
-  }
-  const index = TAGS_ORDER.indexOf(tag);
-  return index === -1 ? TAGS_ORDER.indexOf("other") : index;
-}
 
 function isBlockComment(comment: PrettierComment): boolean {
   return comment.type === "CommentBlock" || comment.type === "Block";
@@ -441,110 +301,6 @@ function convertCommentDescToDescTag(parsed: Block): void {
       optional: false,
       problems: [],
     });
-  }
-}
-
-/**
- * This is for find params of function name in code as strings of array
- */
-function getParamsOrders(ast: AST, tokenIndex: number): string[] | undefined {
-  let params: Token[] | undefined;
-
-  try {
-    // next token
-    const nextTokenType = ast.tokens[tokenIndex + 1]?.type;
-    if (typeof nextTokenType !== "object") {
-      return undefined;
-    }
-    // Recognize function
-    if (nextTokenType.label === "function") {
-      let openedParenthesesCount = 1;
-      const tokensAfterComment = ast.tokens.slice(tokenIndex + 4);
-
-      const endIndex = tokensAfterComment.findIndex(({ type }) => {
-        if (typeof type === "string") {
-          return false;
-        } else if (type.label === "(") {
-          openedParenthesesCount++;
-        } else if (type.label === ")") {
-          openedParenthesesCount--;
-        }
-
-        return openedParenthesesCount === 0;
-      });
-
-      params = tokensAfterComment.slice(0, endIndex + 1);
-    }
-
-    // Recognize arrow function
-    if (nextTokenType.label === "const") {
-      let openedParenthesesCount = 1;
-      let tokensAfterComment = ast.tokens.slice(tokenIndex + 1);
-      const firstParenthesesIndex = tokensAfterComment.findIndex(
-        ({ type }) => typeof type === "object" && type.label === "(",
-      );
-
-      tokensAfterComment = tokensAfterComment.slice(firstParenthesesIndex + 1);
-
-      const endIndex = tokensAfterComment.findIndex(({ type }) => {
-        if (typeof type === "string") {
-          return false;
-        } else if (type.label === "(") {
-          openedParenthesesCount++;
-        } else if (type.label === ")") {
-          openedParenthesesCount--;
-        }
-
-        return openedParenthesesCount === 0;
-      });
-
-      const arrowItem: Token | undefined = tokensAfterComment[endIndex + 1];
-
-      if (
-        typeof arrowItem?.type === "object" &&
-        arrowItem.type.label === "=>"
-      ) {
-        params = tokensAfterComment.slice(0, endIndex + 1);
-      }
-    }
-
-    return params
-      ?.filter(({ type }) => typeof type === "object" && type.label === "name")
-      .map(({ value }) => value);
-  } catch {
-    //
-  }
-
-  return;
-}
-
-/**
- * If the given tag has a default value, then this will add a note to the
- * description with that default value. This is done because TypeScript does
- * not display the documented JSDoc default value (e.g. `@param [name="John"]`).
- *
- * If the description already contains such a note, it will be updated.
- */
-function addDefaultValueToDescription(tag: Spec): Spec {
-  if (tag.optional && tag.default) {
-    let { description } = tag;
-
-    // remove old note
-    description = description.replace(/[\s]*Default[\s]*is[\s]*`.*`\.?$/, "");
-
-    // add a `.` at the end of previous sentences
-    if (description && !/[.\n]$/.test(description)) {
-      description += ".";
-    }
-
-    description += ` Default is \`${tag.default}\``;
-
-    return {
-      ...tag,
-      description: description.trim(),
-    };
-  } else {
-    return tag;
   }
 }
 
