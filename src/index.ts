@@ -103,14 +103,6 @@ const options = {
     default: false,
     description: "Should format as tsdoc",
   },
-  jsdocPrintWidth: {
-    name: "jsdocPrintWidth",
-    type: "int",
-    category: "jsdoc",
-    default: undefined,
-    description:
-      "If You don't set value to jsdocPrintWidth, the printWidth will be use as jsdocPrintWidth.",
-  },
   jsdocAddDefaultToDescription: {
     name: "jsdocAddDefaultToDescription",
     type: "boolean",
@@ -129,7 +121,6 @@ const options = {
 
 const defaultOptions: JsdocOptions = {
   jsdocSpaces: options.jsdocSpaces.default,
-  jsdocPrintWidth: options.jsdocPrintWidth.default,
   jsdocDescriptionWithDot: options.jsdocDescriptionWithDot.default,
   jsdocDescriptionTag: options.jsdocDescriptionTag.default,
   jsdocVerticalAlignment: options.jsdocVerticalAlignment.default,

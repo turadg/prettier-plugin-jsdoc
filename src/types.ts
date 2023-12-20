@@ -2,7 +2,6 @@ import { ParserOptions } from "prettier";
 
 export interface JsdocOptions {
   jsdocSpaces: number;
-  jsdocPrintWidth?: number;
   jsdocDescriptionWithDot: boolean;
   jsdocDescriptionTag: boolean;
   jsdocVerticalAlignment: boolean;
@@ -20,7 +19,6 @@ export interface JsdocOptions {
   jsdocCapitalizeDescription: boolean;
   jsdocPreferCodeFences: boolean;
   tsdoc: boolean;
-  jsdocLineWrappingStyle: "greedy";
 }
 
 export interface AllOptions extends ParserOptions, JsdocOptions {}
