@@ -66,7 +66,6 @@ test("space after unknownTag", async () => {
       jsdocDescriptionTag: false,
       jsdocDescriptionWithDot: true,
       jsdocKeepUnParseAbleExampleIndent: false,
-      jsdocLineWrappingStyle: "greedy",
       jsdocPreferCodeFences: false,
       jsdocPrintWidth: 120,
       jsdocSeparateReturnsFromParam: false,

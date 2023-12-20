@@ -196,7 +196,6 @@ Description is formatting as Markdown, so you could use any features of Markdown
 | jsdocPreferCodeFences             | Boolean                           | false       | Always fence code blocks (surround them by triple backticks)                              |
 | tsdoc                             | Boolean                           | false       |
 | jsdocPrintWidth                   | Number                            | undefined   | If You don't set value to jsdocPrintWidth, the printWidth will be use as jsdocPrintWidth. |
-| jsdocLineWrappingStyle            | String                            | "greedy"    | "greedy": Lines wrap as soon as they reach the print width                                |
 
 Full up to date list and description of options can be found in Prettier help. First install plugin then run Prettier with "--help" option.
 
